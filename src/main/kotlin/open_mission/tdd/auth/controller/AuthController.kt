@@ -1,5 +1,6 @@
 package open_mission.tdd.auth.controller
 
+import open_mission.tdd.auth.request.LoginRequest
 import open_mission.tdd.auth.request.SignupRequest
 import open_mission.tdd.auth.response.SignupResponse
 import open_mission.tdd.auth.service.AuthService
@@ -22,5 +23,12 @@ class AuthController(private val authService: AuthService) {
         val response = authService.signup(request)
         val location = URI.create("/api/users/${response.id}")
         return ResponseEntity.created(location).body(ApiResponse.success(response, "회원가입 성공"))
+    }
+
+    @PostMapping("/login")
+    fun login(
+        @RequestBody request: LoginRequest
+    ) {
+        val response = authService.login(request)
     }
 }

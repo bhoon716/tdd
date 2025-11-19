@@ -3,7 +3,9 @@ package open_mission.tdd.auth.service
 import jakarta.transaction.Transactional
 import open_mission.tdd.auth.entity.User
 import open_mission.tdd.auth.repository.UserRepository
+import open_mission.tdd.auth.request.LoginRequest
 import open_mission.tdd.auth.request.SignupRequest
+import open_mission.tdd.auth.response.LoginResponse
 import open_mission.tdd.auth.response.SignupResponse
 import open_mission.tdd.common.error.CustomException
 import open_mission.tdd.common.error.ErrorCode
@@ -28,5 +30,9 @@ class AuthService(
         val saved = userRepository.save(user)
 
         return SignupResponse.from(saved)
+    }
+
+    fun login(request: LoginRequest): LoginResponse {
+        TODO("Not yet implemented")
     }
 }

@@ -7,6 +7,9 @@ enum class ErrorCode(
     val message: String,
     val status: HttpStatus,
 ) {
+    // 401 Unauthorized
+    INVALID_LOGIN("4011", "이메일 또는 비밀번호가 올바르지 않습니다.", HttpStatus.UNAUTHORIZED),
+
     // 409 Conflict
     DUPLICATED_USER_EMAIL("4091", "이미 가입된 이메일입니다.", HttpStatus.CONFLICT),
 

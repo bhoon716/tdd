@@ -4,8 +4,8 @@ import io.mockk.every
 import io.mockk.mockk
 import open_mission.tdd.auth.entity.User
 import open_mission.tdd.auth.repository.UserRepository
+import open_mission.tdd.auth.request.LoginRequest
 import open_mission.tdd.auth.request.SignupRequest
-import open_mission.tdd.auth.response.SignupResponse
 import open_mission.tdd.common.error.CustomException
 import open_mission.tdd.common.error.ErrorCode
 import org.assertj.core.api.Assertions.assertThat
@@ -55,5 +55,38 @@ class AuthServiceTest {
         assertThatThrownBy { authService.signup(request) }
             .isExactlyInstanceOf(CustomException::class.java)
             .hasMessage(ErrorCode.DUPLICATED_USER_EMAIL.message)
+    }
+
+    @DisplayName("로그인 성공 테스트")
+    @Test
+    fun loginTest() {
+        // given
+        val email = "test@email.com"
+        val password = "password123"
+        val request = LoginRequest(email, password)
+
+        // when
+        val response = authService.login(request)
+
+        // then
+        assertThat(response.tokenType).isEqualTo("Bearer")
+        assertThat(response.accessToken).isEqualTo("access")
+        assertThat(response.refreshToken).isEqualTo("refresh")
+        assertThat(response.expiresIn).isEqualTo(24*3600)
+    }
+
+    @DisplayName("로그인 실패 테스트")
+    @Test
+    fun loginFailTest() {
+        // given
+        val email = "test@email.com"
+        val password = "password123"
+        every { userRepository.findByEmail(email) } returns User(1L, "test@email.com", "encodedPassword")
+        every { passwordEncoder.matches(any(), any()) } returns false
+
+        // when & then
+        assertThatThrownBy { authService.login(LoginRequest(email, password) )}
+            .isExactlyInstanceOf(CustomException::class.java)
+            .hasMessage(ErrorCode.INVALID_LOGIN.message)
     }
 }
