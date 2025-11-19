@@ -1,3 +1,8 @@
 package open_mission.tdd.common.error
 
-class CustomException(val errorCode: ErrorCode, var detail: String?) : RuntimeException()
+class CustomException(
+    val errorCode: ErrorCode,
+    val detail: String? = null,
+) : RuntimeException(
+    detail?.let { "${errorCode.message} - $it" } ?: errorCode.message,
+)

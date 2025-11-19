@@ -8,25 +8,29 @@ data class ApiResponse<T>(
     val success: Boolean,
     val code: String,
     val message: String? = null,
-    val data: T? = null
+    val data: T? = null,
 ) {
     companion object {
-        fun <T> success(code: String, message: String?, data: T?): ApiResponse<T> {
-            return ApiResponse(
+        fun <T> success(
+            data: T,
+            code: String = "SUCCESS",
+            message: String? = null,
+        ): ApiResponse<T> =
+            ApiResponse(
                 true,
                 code,
                 message,
                 data
             )
-        }
 
-        fun <T> fail(errorCode: ErrorCode, data: T?): ApiResponse<T> {
-            return ApiResponse(
-                false,
-                errorCode.code,
-                errorCode.message,
-                data
-            )
-        }
+        fun <T> fail(
+            errorCode: ErrorCode,
+            data: T? = null,
+        ): ApiResponse<T> = ApiResponse(
+            false,
+            errorCode.code,
+            errorCode.message,
+            data
+        )
     }
 }
