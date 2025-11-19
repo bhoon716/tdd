@@ -76,10 +76,8 @@ class AuthServiceTest {
         val response = authService.login(request)
 
         // then
-        assertThat(response.tokenType).isEqualTo("Bearer")
         assertThat(response.accessToken).isEqualTo("access")
         assertThat(response.refreshToken).isEqualTo("refresh")
-        assertThat(response.expiresIn).isEqualTo(24 * 3600)
     }
 
     @DisplayName("로그인 실패 테스트")

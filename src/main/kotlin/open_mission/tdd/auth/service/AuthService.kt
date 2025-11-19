@@ -5,8 +5,8 @@ import open_mission.tdd.auth.entity.User
 import open_mission.tdd.auth.repository.UserRepository
 import open_mission.tdd.auth.request.LoginRequest
 import open_mission.tdd.auth.request.SignupRequest
-import open_mission.tdd.auth.response.LoginResponse
 import open_mission.tdd.auth.response.SignupResponse
+import open_mission.tdd.auth.response.TokenDto
 import open_mission.tdd.common.error.CustomException
 import open_mission.tdd.common.error.ErrorCode
 import open_mission.tdd.security.jwt.JwtTokenProvider
@@ -34,7 +34,7 @@ class AuthService(
         return SignupResponse.from(saved)
     }
 
-    fun login(request: LoginRequest): LoginResponse {
+    fun login(request: LoginRequest): TokenDto {
         val user = (userRepository.findByEmail(request.email)
             ?: throw CustomException(ErrorCode.INVALID_LOGIN))
 
@@ -44,7 +44,7 @@ class AuthService(
 
         val accessToken = jwtTokenProvider.generateAccess(user.id!!, user.email)
         val refreshToken = jwtTokenProvider.generateRefresh(user.id!!, user.email)
-        val expiresIn = 24 * 3600L
-        return LoginResponse(accessToken, refreshToken, "Bearer", expiresIn)
+
+        return TokenDto(accessToken, refreshToken)
     }
 }

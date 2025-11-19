@@ -22,14 +22,14 @@ class JwtTokenProvider(
     fun generateAccess(id: Long, email: String): String {
         val jti = UUID.randomUUID().toString()
         val now = System.currentTimeMillis()
-        val expMillis = now + ACCESS_TTL
+        val expMillis = now + ACCESS_TTL.toMillis()
         return generateToken(jti, id, email, "access", Date(), Date(expMillis))
     }
 
     fun generateRefresh(id: Long, email: String): String {
         val jti = UUID.randomUUID().toString()
         val now = System.currentTimeMillis()
-        val expMillis = now + REFRESH_TTL
+        val expMillis = now + REFRESH_TTL.toMillis()
         return generateToken(jti, id, email, "refresh", Date(), Date(expMillis))
     }
 
@@ -53,7 +53,7 @@ class JwtTokenProvider(
     }
 
     companion object {
-        val ACCESS_TTL = Duration.ofMinutes(30L).toMillis()
-        val REFRESH_TTL = Duration.ofDays(14L).toMillis()
+        val ACCESS_TTL: Duration = Duration.ofMinutes(30L)
+        val REFRESH_TTL: Duration = Duration.ofDays(14L)
     }
 }
