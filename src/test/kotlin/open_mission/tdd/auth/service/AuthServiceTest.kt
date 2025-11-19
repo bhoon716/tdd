@@ -8,6 +8,7 @@ import open_mission.tdd.auth.request.LoginRequest
 import open_mission.tdd.auth.request.SignupRequest
 import open_mission.tdd.common.error.CustomException
 import open_mission.tdd.common.error.ErrorCode
+import open_mission.tdd.security.jwt.JwtTokenProvider
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.DisplayName
@@ -19,7 +20,8 @@ class AuthServiceTest {
 
     val userRepository: UserRepository = mockk()
     val passwordEncoder: PasswordEncoder = mockk()
-    val authService = AuthService(userRepository, passwordEncoder)
+    val jwtTokenProvider: JwtTokenProvider = mockk()
+    val authService = AuthService(userRepository, passwordEncoder, jwtTokenProvider)
 
     @DisplayName("회원가입 테스트")
     @Test
@@ -65,6 +67,11 @@ class AuthServiceTest {
         val password = "password123"
         val request = LoginRequest(email, password)
 
+        every { userRepository.findByEmail(any()) } returns User(1L, "test@email.com", "encodedPassword")
+        every { passwordEncoder.matches(any(), any()) } returns true
+        every { jwtTokenProvider.generateAccess() } returns "access"
+        every { jwtTokenProvider.generateRefresh() } returns "refresh"
+
         // when
         val response = authService.login(request)
 
@@ -72,7 +79,7 @@ class AuthServiceTest {
         assertThat(response.tokenType).isEqualTo("Bearer")
         assertThat(response.accessToken).isEqualTo("access")
         assertThat(response.refreshToken).isEqualTo("refresh")
-        assertThat(response.expiresIn).isEqualTo(24*3600)
+        assertThat(response.expiresIn).isEqualTo(24 * 3600)
     }
 
     @DisplayName("로그인 실패 테스트")
@@ -85,7 +92,7 @@ class AuthServiceTest {
         every { passwordEncoder.matches(any(), any()) } returns false
 
         // when & then
-        assertThatThrownBy { authService.login(LoginRequest(email, password) )}
+        assertThatThrownBy { authService.login(LoginRequest(email, password)) }
             .isExactlyInstanceOf(CustomException::class.java)
             .hasMessage(ErrorCode.INVALID_LOGIN.message)
     }

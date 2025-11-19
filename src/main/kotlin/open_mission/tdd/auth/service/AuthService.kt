@@ -9,6 +9,7 @@ import open_mission.tdd.auth.response.LoginResponse
 import open_mission.tdd.auth.response.SignupResponse
 import open_mission.tdd.common.error.CustomException
 import open_mission.tdd.common.error.ErrorCode
+import open_mission.tdd.security.jwt.JwtTokenProvider
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 
@@ -16,7 +17,8 @@ import org.springframework.stereotype.Service
 @Transactional
 class AuthService(
     private val userRepository: UserRepository,
-    private val passwordEncoder: PasswordEncoder
+    private val passwordEncoder: PasswordEncoder,
+    private val jwtTokenProvider: JwtTokenProvider
 ) {
 
     fun signup(request: SignupRequest): SignupResponse {
@@ -33,6 +35,16 @@ class AuthService(
     }
 
     fun login(request: LoginRequest): LoginResponse {
-        TODO("Not yet implemented")
+        val user = (userRepository.findByEmail(request.email)
+            ?: throw CustomException(ErrorCode.INVALID_LOGIN))
+
+        if (!passwordEncoder.matches(request.password, user.password)) {
+            throw CustomException(ErrorCode.INVALID_LOGIN)
+        }
+
+        val accessToken = jwtTokenProvider.generateAccess()
+        val refreshToken = jwtTokenProvider.generateRefresh()
+        val expiresIn = 24 * 3600L
+        return LoginResponse(accessToken, refreshToken, "Bearer", expiresIn)
     }
 }
