@@ -12,4 +12,6 @@ enum class ErrorCode(
 
     // 500 Internal Server Error
     INTERNAL_SERVER_ERROR("5000", "서버 에러가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+    NON_PERSISTED_USER_ID("5001", "저장되지 않은 사용자입니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+    NON_PERSISTED_USER_CREATED_AT("5002", "저장되지 않은 사용자입니다.", HttpStatus.INTERNAL_SERVER_ERROR),
 }

@@ -5,6 +5,7 @@ import io.mockk.mockk
 import open_mission.tdd.auth.entity.User
 import open_mission.tdd.auth.repository.UserRepository
 import open_mission.tdd.auth.request.SignupRequest
+import open_mission.tdd.auth.response.SignupResponse
 import open_mission.tdd.common.error.CustomException
 import open_mission.tdd.common.error.ErrorCode
 import org.assertj.core.api.Assertions.assertThat
@@ -12,7 +13,7 @@ import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.springframework.security.crypto.password.PasswordEncoder
-
+import java.time.LocalDateTime
 
 class AuthServiceTest {
 
@@ -28,7 +29,11 @@ class AuthServiceTest {
 
         every { userRepository.existsByEmail("email@test.com") } returns false
         every { passwordEncoder.encode("password123") } returns "encodedPassword"
-        every { userRepository.save(any()) } returns User(1L, "email@test.com", "encodedPassword")
+
+        val persistedUser = User(1L, "email@test.com", "encodedPassword").apply {
+            createdAt = LocalDateTime.of(2025, 1, 1, 1, 0)
+        }
+        every { userRepository.save(any()) } returns persistedUser
 
         // when
         val response = authService.signup(request)
@@ -45,11 +50,9 @@ class AuthServiceTest {
         val request = SignupRequest("email@test.com", "password123")
 
         every { userRepository.existsByEmail("email@test.com") } returns true
-//        every { passwordEncoder.encode("password123") } returns "encodedPassword"
-//        every { userRepository.save(any()) } returns User(1L, "email@test.com", "encodedPassword")
 
         // when & then
-        assertThatThrownBy{ authService.signup(request)}
+        assertThatThrownBy { authService.signup(request) }
             .isExactlyInstanceOf(CustomException::class.java)
             .hasMessage(ErrorCode.DUPLICATED_USER_EMAIL.message)
     }

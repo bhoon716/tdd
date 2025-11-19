@@ -1,18 +1,29 @@
 package open_mission.tdd.auth.entity
 
 import jakarta.persistence.*
-import lombok.AccessLevel
-import lombok.Getter
-import lombok.NoArgsConstructor
 import open_mission.tdd.common.base.BaseEntity
 
 @Entity
-@Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "users")
 class User(
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private val id: Long,
-    private val email: String,
-    private val password: String,
-) : BaseEntity()
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
+    val id: Long? = null,
+
+    @Column(nullable = false, unique = true)
+    val email: String,
+
+    @Column(nullable = false)
+    var password: String,
+) : BaseEntity() {
+
+    companion object {
+        fun of(email: String, encodedPassword: String): User =
+            User(
+                email = email,
+                password = encodedPassword,
+            )
+    }
+}
