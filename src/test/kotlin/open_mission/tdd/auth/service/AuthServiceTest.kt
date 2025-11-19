@@ -69,8 +69,8 @@ class AuthServiceTest {
 
         every { userRepository.findByEmail(any()) } returns User(1L, "test@email.com", "encodedPassword")
         every { passwordEncoder.matches(any(), any()) } returns true
-        every { jwtTokenProvider.generateAccess() } returns "access"
-        every { jwtTokenProvider.generateRefresh() } returns "refresh"
+        every { jwtTokenProvider.generateAccess(any(), any()) } returns "access"
+        every { jwtTokenProvider.generateRefresh(any(), any()) } returns "refresh"
 
         // when
         val response = authService.login(request)

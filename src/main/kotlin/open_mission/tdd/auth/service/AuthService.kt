@@ -42,8 +42,8 @@ class AuthService(
             throw CustomException(ErrorCode.INVALID_LOGIN)
         }
 
-        val accessToken = jwtTokenProvider.generateAccess()
-        val refreshToken = jwtTokenProvider.generateRefresh()
+        val accessToken = jwtTokenProvider.generateAccess(user.id!!, user.email)
+        val refreshToken = jwtTokenProvider.generateRefresh(user.id!!, user.email)
         val expiresIn = 24 * 3600L
         return LoginResponse(accessToken, refreshToken, "Bearer", expiresIn)
     }
