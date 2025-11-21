@@ -11,11 +11,10 @@ import open_mission.tdd.todo.entity.TodoStatus
 import open_mission.tdd.todo.repository.TodoRepository
 import open_mission.tdd.todo.request.CreateTodoRequest
 import open_mission.tdd.todo.request.UpdateTodoRequest
-import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.assertj.core.api.Assertions.*
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
-import java.util.Optional
+import java.util.*
 
 class TodoServiceTest {
 
@@ -150,11 +149,11 @@ class TodoServiceTest {
         val user = User(userId, "email@test.com", "encodedPassword")
         val todo = Todo(todoId, user, "title", "content", TodoStatus.DONE)
 
-        every { todoRepository.findById(todoId) } returns Optional.of(todo)
+        every { todoRepository.findByIdAndUserId(todoId, userId) } returns Optional.of(todo)
         every { todoRepository.delete(todo) } returns Unit
 
-        // when
-        todoService.deleteTodo(userId, todoId)
+        // when & then
+        assertThatCode { todoService.deleteTodo(userId, todoId) }.doesNotThrowAnyException()
     }
 
     @DisplayName("투두 삭제 실패 테스트 - 투두 없음")
@@ -164,7 +163,7 @@ class TodoServiceTest {
         val userId = 1L
         val todoId = 10L
 
-        every { todoRepository.findById(todoId) } returns Optional.empty()
+        every { todoRepository.findByIdAndUserId(todoId, userId) } returns Optional.empty()
 
         // when & then
         assertThatThrownBy { todoService.deleteTodo(userId, todoId) }

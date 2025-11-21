@@ -52,6 +52,9 @@ class TodoService(
     }
 
     fun deleteTodo(userId: Long, todoId: Long) {
-        TODO()
+        val todo = todoRepository.findByIdAndUserId(todoId, userId)
+            .orElseThrow { CustomException(ErrorCode.TODO_NOT_FOUND, "todoId=$todoId") }
+
+        todoRepository.delete(todo)
     }
 }
