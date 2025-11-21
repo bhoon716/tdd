@@ -1,5 +1,6 @@
 package open_mission.tdd.todo.service
 
+import open_mission.tdd.auth.entity.User
 import open_mission.tdd.auth.repository.UserRepository
 import open_mission.tdd.common.error.CustomException
 import open_mission.tdd.common.error.ErrorCode
@@ -19,8 +20,7 @@ class TodoService(
 ) {
 
     fun createTodo(userId: Long, request: CreateTodoRequest): TodoResponse {
-        val user = userRepository.findById(userId)
-            .orElseThrow { CustomException(ErrorCode.USER_NOT_FOUND, "userId=$userId") }
+        val user = findUserByIdOrThrow(userId)
 
         val todo = Todo.of(user, request.title, request.content)
         val saved = todoRepository.save(todo)
@@ -36,14 +36,12 @@ class TodoService(
 
     @Transactional(readOnly = true)
     fun getTodo(userId: Long, todoId: Long): TodoResponse {
-        val todo = todoRepository.findByIdAndUserId(todoId, userId)
-            .orElseThrow { CustomException(ErrorCode.TODO_NOT_FOUND, "todoId=$todoId") }
+        val todo = findTodoByIdAndUserIdOrThrow(todoId, userId)
         return TodoResponse.of(todo)
     }
 
     fun updateTodo(userId: Long, todoId: Long, request: UpdateTodoRequest): TodoResponse {
-        val todo = todoRepository.findByIdAndUserId(todoId, userId)
-            .orElseThrow { CustomException(ErrorCode.TODO_NOT_FOUND, "todoId=$todoId") }
+        val todo = findTodoByIdAndUserIdOrThrow(todoId, userId)
 
         todo.update(request.title, request.content, request.status)
         val saved = todoRepository.save(todo)
@@ -52,9 +50,18 @@ class TodoService(
     }
 
     fun deleteTodo(userId: Long, todoId: Long) {
-        val todo = todoRepository.findByIdAndUserId(todoId, userId)
-            .orElseThrow { CustomException(ErrorCode.TODO_NOT_FOUND, "todoId=$todoId") }
+        val todo = findTodoByIdAndUserIdOrThrow(todoId, userId)
 
         todoRepository.delete(todo)
+    }
+
+    private fun findUserByIdOrThrow(userId: Long): User {
+        return userRepository.findById(userId)
+            .orElseThrow { CustomException(ErrorCode.USER_NOT_FOUND, "userId=$userId") }
+    }
+
+    private fun findTodoByIdAndUserIdOrThrow(todoId: Long, userId: Long): Todo {
+        return todoRepository.findByIdAndUserId(todoId, userId)
+            .orElseThrow { CustomException(ErrorCode.TODO_NOT_FOUND, "todoId=$todoId") }
     }
 }
