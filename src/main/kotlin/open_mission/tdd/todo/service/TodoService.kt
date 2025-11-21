@@ -1,6 +1,9 @@
 package open_mission.tdd.todo.service
 
 import open_mission.tdd.auth.repository.UserRepository
+import open_mission.tdd.common.error.CustomException
+import open_mission.tdd.common.error.ErrorCode
+import open_mission.tdd.todo.entity.Todo
 import open_mission.tdd.todo.repository.TodoRepository
 import open_mission.tdd.todo.request.CreateTodoRequest
 import open_mission.tdd.todo.request.UpdateTodoRequest
@@ -16,7 +19,13 @@ class TodoService(
 ) {
 
     fun createTodo(userId: Long, request: CreateTodoRequest) : TodoResponse {
-        TODO()
+        val user = userRepository.findById(userId)
+            .orElseThrow { CustomException(ErrorCode.NOT_FOUNT_USER) }
+
+        val todo = Todo.of(user, request.title, request.content)
+        val saved = todoRepository.save(todo)
+
+        return TodoResponse.of(saved)
     }
 
     @Transactional(readOnly = true)

@@ -11,6 +11,7 @@ import open_mission.tdd.todo.request.CreateTodoRequest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
+import java.util.Optional
 
 class TodoServiceTest {
 
@@ -24,6 +25,7 @@ class TodoServiceTest {
         // given
         val request = CreateTodoRequest("todo title", "todo content")
         val user = User(1L, "email@test.com", "encodedPassword")
+        every { userRepository.findById(1L) } returns Optional.ofNullable(user)
         every { todoRepository.save<Todo>(any()) } returns Todo(1L, user, "todo title", "todo content", TodoStatus.DONE)
 
         // when
