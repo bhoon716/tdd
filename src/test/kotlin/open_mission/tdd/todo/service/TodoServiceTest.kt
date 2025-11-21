@@ -97,18 +97,6 @@ class TodoServiceTest {
             .hasMessageContaining(ErrorCode.TODO_NOT_FOUND.message)
     }
 
-    @DisplayName("투두 단건 조회 실패 테스트 - 다른 유저의 투두")
-    @Test
-    fun getTodoOtherUserTest() {
-        // given
-        every { todoRepository.findByIdAndUserId(1L, 2L) } returns Optional.empty()
-
-        // when & then
-        assertThatThrownBy { todoService.getTodo(2L, 1L) }
-            .isExactlyInstanceOf(CustomException::class.java)
-            .hasMessageContaining(ErrorCode.TODO_NOT_FOUND.message)
-    }
-
     @DisplayName("투두 수정 테스트 - 성공")
     @Test
     fun updateTodoTest() {
@@ -143,22 +131,6 @@ class TodoServiceTest {
         // given
         val userId = 1L
         val todoId = 2L
-        val request = UpdateTodoRequest("new title", "new content", TodoStatus.DONE)
-
-        every { todoRepository.findByIdAndUserId(todoId, userId) } returns Optional.empty()
-
-        // when & then
-        assertThatThrownBy { todoService.updateTodo(userId, todoId, request) }
-            .isExactlyInstanceOf(CustomException::class.java)
-            .hasMessageContaining(ErrorCode.TODO_NOT_FOUND.message)
-    }
-
-    @DisplayName("투두 수정 실패 테스트 - 다른 유저의 투두")
-    @Test
-    fun updateTodoOtherUserTest() {
-        // given
-        val userId = 1L
-        val todoId = 10L
         val request = UpdateTodoRequest("new title", "new content", TodoStatus.DONE)
 
         every { todoRepository.findByIdAndUserId(todoId, userId) } returns Optional.empty()
