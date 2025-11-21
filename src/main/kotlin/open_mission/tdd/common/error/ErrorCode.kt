@@ -11,7 +11,8 @@ enum class ErrorCode(
     INVALID_LOGIN("4011", "이메일 또는 비밀번호가 올바르지 않습니다.", HttpStatus.UNAUTHORIZED),
 
     // 404 Not Found
-    NOT_FOUNT_USER("4041", "사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    USER_NOT_FOUND("4041", "사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    TODO_NOT_FOUND("4042", "해당 투두를 찾을 수 없습니다." , HttpStatus.NOT_FOUND),
 
     // 409 Conflict
     DUPLICATED_USER_EMAIL("4091", "이미 가입된 이메일입니다.", HttpStatus.CONFLICT),

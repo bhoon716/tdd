@@ -4,11 +4,14 @@ import io.mockk.every
 import io.mockk.mockk
 import open_mission.tdd.auth.entity.User
 import open_mission.tdd.auth.repository.UserRepository
+import open_mission.tdd.common.error.CustomException
+import open_mission.tdd.common.error.ErrorCode
 import open_mission.tdd.todo.entity.Todo
 import open_mission.tdd.todo.entity.TodoStatus
 import open_mission.tdd.todo.repository.TodoRepository
 import open_mission.tdd.todo.request.CreateTodoRequest
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import java.util.Optional
@@ -56,5 +59,50 @@ class TodoServiceTest {
         assertThat(todos[0].title).isEqualTo("todo1")
         assertThat(todos[1].title).isEqualTo("todo2")
         assertThat(todos[2].title).isEqualTo("todo3")
+    }
+
+    @DisplayName("투두 단건 조회 테스트 - 성공")
+    @Test
+    fun getTodoTest() {
+        // given
+        val userId = 1L
+        val todoId = 10L
+        val user = User(userId, "email@test.com", "encodedPassword")
+        val todo = Todo(todoId, user, "todo title", "todo content", TodoStatus.DO)
+
+        every { todoRepository.findByIdAndUserId(todoId, userId) } returns Optional.of(todo)
+
+        // when
+        val response = todoService.getTodo(userId, todoId)
+
+        // then
+        assertThat(response.id).isEqualTo(todoId)
+        assertThat(response.title).isEqualTo("todo title")
+        assertThat(response.content).isEqualTo("todo content")
+        assertThat(response.status).isEqualTo(TodoStatus.DO)
+    }
+
+    @DisplayName("투두 단건 조회 실패 테스트 - 투두 없음")
+    @Test
+    fun getTodoNotFoundTest() {
+        // given
+        every { todoRepository.findByIdAndUserId(1L, 2L) } returns Optional.empty()
+
+        // when & then
+        assertThatThrownBy { todoService.getTodo(2L, 1L) }
+            .isExactlyInstanceOf(CustomException::class.java)
+            .hasMessageContaining(ErrorCode.TODO_NOT_FOUND.message)
+    }
+
+    @DisplayName("투두 단건 조회 실패 테스트 - 다른 유저의 투두")
+    @Test
+    fun getTodoOtherUserTest() {
+        // given
+        every { todoRepository.findByIdAndUserId(1L, 2L) } returns Optional.empty()
+
+        // when & then
+        assertThatThrownBy { todoService.getTodo(2L, 1L) }
+            .isExactlyInstanceOf(CustomException::class.java)
+            .hasMessageContaining(ErrorCode.TODO_NOT_FOUND.message)
     }
 }
