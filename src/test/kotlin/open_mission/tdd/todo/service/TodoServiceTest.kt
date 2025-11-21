@@ -43,9 +43,9 @@ class TodoServiceTest {
     fun getTodosTest() {
         // given
         val user = User(1L, "email@test.com", "encodedPassword")
-        val todo1 = Todo.of(user, "todo1", "content1")
-        val todo2 = Todo.of(user, "todo2", "content2")
-        val todo3 = Todo.of(user, "todo3", "content3")
+        val todo1 = Todo(1L, user, "todo1", "content1")
+        val todo2 = Todo(2L, user, "todo2", "content2")
+        val todo3 = Todo(3L, user, "todo3", "content3")
         every { todoRepository.findAllByUserId(1L) } returns listOf(todo1, todo2, todo3)
 
         // when
@@ -53,8 +53,8 @@ class TodoServiceTest {
 
         // then
         assertThat(todos.size).isEqualTo(3)
-        assertThat(todos[1].title).isEqualTo("todo1")
-        assertThat(todos[2].title).isEqualTo("todo2")
-        assertThat(todos[3].title).isEqualTo("todo3")
+        assertThat(todos[0].title).isEqualTo("todo1")
+        assertThat(todos[1].title).isEqualTo("todo2")
+        assertThat(todos[2].title).isEqualTo("todo3")
     }
 }

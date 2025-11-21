@@ -30,7 +30,8 @@ class TodoService(
 
     @Transactional(readOnly = true)
     fun getTodos(userId: Long): List<TodoResponse> {
-        TODO()
+        return todoRepository.findAllByUserId(userId)
+            .map { todo -> TodoResponse.of(todo) }
     }
 
     @Transactional(readOnly = true)
