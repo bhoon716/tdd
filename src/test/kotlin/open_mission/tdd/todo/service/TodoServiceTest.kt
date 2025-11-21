@@ -37,4 +37,24 @@ class TodoServiceTest {
         assertThat(response.content).isEqualTo("todo content")
         assertThat(response.status).isEqualTo(TodoStatus.DONE)
     }
+
+    @DisplayName("투두 전체 조회 테스트")
+    @Test
+    fun getTodosTest() {
+        // given
+        val user = User(1L, "email@test.com", "encodedPassword")
+        val todo1 = Todo.of(user, "todo1", "content1")
+        val todo2 = Todo.of(user, "todo2", "content2")
+        val todo3 = Todo.of(user, "todo3", "content3")
+        every { todoRepository.findAllByUserId(1L) } returns listOf(todo1, todo2, todo3)
+
+        // when
+        val todos = todoService.getTodos(1L)
+
+        // then
+        assertThat(todos.size).isEqualTo(3)
+        assertThat(todos[1].title).isEqualTo("todo1")
+        assertThat(todos[2].title).isEqualTo("todo2")
+        assertThat(todos[3].title).isEqualTo("todo3")
+    }
 }
