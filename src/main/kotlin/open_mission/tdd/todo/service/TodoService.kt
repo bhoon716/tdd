@@ -18,9 +18,9 @@ class TodoService(
     private val todoRepository: TodoRepository
 ) {
 
-    fun createTodo(userId: Long, request: CreateTodoRequest) : TodoResponse {
+    fun createTodo(userId: Long, request: CreateTodoRequest): TodoResponse {
         val user = userRepository.findById(userId)
-            .orElseThrow { CustomException(ErrorCode.NOT_FOUNT_USER) }
+            .orElseThrow { CustomException(ErrorCode.USER_NOT_FOUND, "userId=$userId") }
 
         val todo = Todo.of(user, request.title, request.content)
         val saved = todoRepository.save(todo)
@@ -35,11 +35,13 @@ class TodoService(
     }
 
     @Transactional(readOnly = true)
-    fun getTodo(userId: Long, todoId: Long) : TodoResponse {
-        TODO()
+    fun getTodo(userId: Long, todoId: Long): TodoResponse {
+        val todo = todoRepository.findByIdAndUserId(todoId, userId)
+            .orElseThrow { CustomException(ErrorCode.TODO_NOT_FOUND, "todoId=$todoId") }
+        return TodoResponse.of(todo)
     }
 
-    fun updateTodo(userId: Long, request: UpdateTodoRequest) : TodoResponse {
+    fun updateTodo(userId: Long, request: UpdateTodoRequest): TodoResponse {
         TODO()
     }
 
