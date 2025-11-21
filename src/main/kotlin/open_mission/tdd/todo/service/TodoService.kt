@@ -41,8 +41,14 @@ class TodoService(
         return TodoResponse.of(todo)
     }
 
-    fun updateTodo(userId: Long, request: UpdateTodoRequest): TodoResponse {
-        TODO()
+    fun updateTodo(userId: Long, todoId: Long, request: UpdateTodoRequest): TodoResponse {
+        val todo = todoRepository.findByIdAndUserId(todoId, userId)
+            .orElseThrow { CustomException(ErrorCode.TODO_NOT_FOUND, "todoId=$todoId") }
+
+        todo.update(request.title, request.content, request.status)
+        val saved = todoRepository.save(todo)
+
+        return TodoResponse.of(saved)
     }
 
     fun deleteTodo(userId: Long, todoId: Long) {
