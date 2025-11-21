@@ -10,6 +10,7 @@ import open_mission.tdd.todo.entity.Todo
 import open_mission.tdd.todo.entity.TodoStatus
 import open_mission.tdd.todo.repository.TodoRepository
 import open_mission.tdd.todo.request.CreateTodoRequest
+import open_mission.tdd.todo.request.UpdateTodoRequest
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.DisplayName
@@ -28,6 +29,7 @@ class TodoServiceTest {
         // given
         val request = CreateTodoRequest("todo title", "todo content")
         val user = User(1L, "email@test.com", "encodedPassword")
+
         every { userRepository.findById(1L) } returns Optional.ofNullable(user)
         every { todoRepository.save<Todo>(any()) } returns Todo(1L, user, "todo title", "todo content", TodoStatus.DONE)
 
@@ -49,6 +51,7 @@ class TodoServiceTest {
         val todo1 = Todo(1L, user, "todo1", "content1")
         val todo2 = Todo(2L, user, "todo2", "content2")
         val todo3 = Todo(3L, user, "todo3", "content3")
+
         every { todoRepository.findAllByUserId(1L) } returns listOf(todo1, todo2, todo3)
 
         // when
@@ -102,6 +105,66 @@ class TodoServiceTest {
 
         // when & then
         assertThatThrownBy { todoService.getTodo(2L, 1L) }
+            .isExactlyInstanceOf(CustomException::class.java)
+            .hasMessageContaining(ErrorCode.TODO_NOT_FOUND.message)
+    }
+
+    @DisplayName("투두 수정 테스트 - 성공")
+    @Test
+    fun updateTodoTest() {
+        // given
+        val userId = 1L
+        val todoId = 2L
+        val user = User(userId, "email@test.com", "encodedPassword")
+        val todo = Todo(todoId, user, "old title", "old content", TodoStatus.DO)
+
+        val request = UpdateTodoRequest(
+            title = "new title",
+            content = "new content",
+            status = TodoStatus.DONE,
+        )
+
+        every { todoRepository.findByIdAndUserId(todoId, userId) } returns Optional.of(todo)
+        every { todoRepository.save(todo) } returns todo
+
+        // when
+        val response = todoService.updateTodo(userId, todoId, request)
+
+        // then
+        assertThat(response.id).isEqualTo(todoId)
+        assertThat(response.title).isEqualTo("new title")
+        assertThat(response.content).isEqualTo("new content")
+        assertThat(response.status).isEqualTo(TodoStatus.DONE)
+    }
+
+    @DisplayName("투두 수정 실패 테스트 - 투두 없음")
+    @Test
+    fun updateTodoNotFoundTest() {
+        // given
+        val userId = 1L
+        val todoId = 2L
+        val request = UpdateTodoRequest("new title", "new content", TodoStatus.DONE)
+
+        every { todoRepository.findByIdAndUserId(todoId, userId) } returns Optional.empty()
+
+        // when & then
+        assertThatThrownBy { todoService.updateTodo(userId, todoId, request) }
+            .isExactlyInstanceOf(CustomException::class.java)
+            .hasMessageContaining(ErrorCode.TODO_NOT_FOUND.message)
+    }
+
+    @DisplayName("투두 수정 실패 테스트 - 다른 유저의 투두")
+    @Test
+    fun updateTodoOtherUserTest() {
+        // given
+        val userId = 1L
+        val todoId = 10L
+        val request = UpdateTodoRequest("new title", "new content", TodoStatus.DONE)
+
+        every { todoRepository.findByIdAndUserId(todoId, userId) } returns Optional.empty()
+
+        // when & then
+        assertThatThrownBy { todoService.updateTodo(userId, todoId, request) }
             .isExactlyInstanceOf(CustomException::class.java)
             .hasMessageContaining(ErrorCode.TODO_NOT_FOUND.message)
     }
