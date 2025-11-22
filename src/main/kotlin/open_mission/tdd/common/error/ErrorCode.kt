@@ -9,6 +9,7 @@ enum class ErrorCode(
 ) {
     // 401 Unauthorized
     INVALID_LOGIN("4011", "이메일 또는 비밀번호가 올바르지 않습니다.", HttpStatus.UNAUTHORIZED),
+    INVALID_TOKEN("4012", "유효한 토큰이 아닙니다.", HttpStatus.UNAUTHORIZED),
 
     // 404 Not Found
     USER_NOT_FOUND("4041", "사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
