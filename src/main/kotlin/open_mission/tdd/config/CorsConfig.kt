@@ -14,7 +14,7 @@ class CorsConfig {
     fun corsConfigurationSource(): CorsConfigurationSource {
         val config = CorsConfiguration()
         config.allowCredentials = true
-        config.allowedOriginPatterns = listOf("http://localhost:*")
+        config.allowedOriginPatterns = listOf("http://localhost:*", "http://210.117.128.253", "http://bhoon.iptime.org")
         config.allowedMethods = listOf("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
         config.allowedHeaders = listOf("*")
         config.exposedHeaders = listOf(HttpHeaders.AUTHORIZATION, HttpHeaders.SET_COOKIE)
