@@ -3,7 +3,6 @@ package open_mission.tdd.security.jwt
 import io.jsonwebtoken.JwtException
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Keys
-import open_mission.tdd.auth.repository.UserRepository
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import java.nio.charset.StandardCharsets
@@ -53,7 +52,7 @@ class JwtTokenProvider(
             .compact()
     }
 
-    fun isValid(token: String): Boolean {
+    fun validate(token: String): Boolean {
         try {
             val claimsJws = Jwts.parser()
                 .verifyWith(secretKey)

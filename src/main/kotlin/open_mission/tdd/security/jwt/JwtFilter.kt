@@ -1,6 +1,5 @@
 package open_mission.tdd.security.jwt
 
-import io.jsonwebtoken.JwtException
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
@@ -18,35 +17,27 @@ class JwtFilter(
     private val jwtTokenProvider: JwtTokenProvider,
     private val userRepository: UserRepository
 ) : OncePerRequestFilter() {
-
     override fun doFilterInternal(
         request: HttpServletRequest,
         response: HttpServletResponse,
         filterChain: FilterChain
     ) {
         var accessToken = request.getHeader(HttpHeaders.AUTHORIZATION)
-
-        if (accessToken == null || !accessToken.startsWith("Bearer")) {
+        if (accessToken == null || !accessToken.startsWith("Bearer ")) {
             filterChain.doFilter(request, response)
             return
         }
-
         accessToken = accessToken.substring("Bearer ".length)
-
         try {
-            jwtTokenProvider.isValid(accessToken)
-        } catch (_: JwtException) {
-            throw CustomException(ErrorCode.INVALID_TOKEN)
+            jwtTokenProvider.validate(accessToken)
+            val userId = jwtTokenProvider.getUserIdFromToken(accessToken)
+            val user = userRepository.findById(userId)
+                .orElseThrow { CustomException(ErrorCode.INVALID_TOKEN) }
+            val authentication = UsernamePasswordAuthenticationToken(user.id, null, emptyList())
+            SecurityContextHolder.getContext().authentication = authentication
+        } catch (_: Exception) {
+            SecurityContextHolder.clearContext()
         }
-
-        val userId = jwtTokenProvider.getUserIdFromToken(accessToken)
-        val user = userRepository.findById(userId)
-            .orElseThrow { CustomException(ErrorCode.INVALID_TOKEN) }
-
-        val authentication = UsernamePasswordAuthenticationToken(user.id, null, emptyList())
-
-        SecurityContextHolder.getContext().authentication = authentication
-
         filterChain.doFilter(request, response)
     }
 }
