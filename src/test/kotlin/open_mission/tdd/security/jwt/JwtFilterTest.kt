@@ -34,7 +34,7 @@ class JwtFilterTest {
         val userRepository = mockk<UserRepository>()
         val jwtFilter = JwtFilter(jwtTokenProvider, userRepository)
 
-        every { jwtTokenProvider.isValid(token) } returns true
+        every { jwtTokenProvider.validate(token) } returns true
         every { jwtTokenProvider.getUserIdFromToken(token)} returns userId
         every { userRepository.findById(userId) } returns Optional.ofNullable(user)
 
